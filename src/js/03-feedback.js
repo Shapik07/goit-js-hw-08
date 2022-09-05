@@ -2,54 +2,38 @@ import throttle from 'lodash.throttle';
 
 const STORAGE_KEY = 'feedback-form-state';
 
-const form = document.querySelector('.feedback-form');
-const formData = {};
+const feedbackFormRef = document.querySelector('.feedback-form');
 
-const refs = {
-  form: document.querySelector('.feedback-form'),
-  textarea: document.querySelector('.feedback-form textarea'),
-  email: document.querySelector('.feedback-form input'),
-};
+feedbackFormRef.addEventListener('input', throttle(onFieldsFormInput, 500));
+feedbackFormRef.addEventListener('submit', onSubmitForm);
 
-refs.form.addEventListener('submit', onFormSubmit);
-refs.textarea.addEventListener('input', throttle(onTextareaInput, 500));
+populateFieldForm();
 
-refs.form.addEventListener('input', e => {
-  e.preventDefault();
+function onFieldsFormInput(e) {
+  let formData = localStorage.getItem(STORAGE_KEY);
+
+  formData = formData ? JSON.parse(formData) : {};
   formData[e.target.name] = e.target.value;
-  console.log(formData);
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-});
+}
 
-populateTextForm();
-populateTextInput();
-
-function onFormSubmit(e) {
+function onSubmitForm(e) {
   e.preventDefault();
 
-  console.log('Отправляем форму');
+  console.log(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+
   e.currentTarget.reset();
   localStorage.removeItem(STORAGE_KEY);
 }
 
-function onTextareaInput(e) {
-  const message = e.target.value;
-  console.log(message);
-}
+function populateFieldForm() {
+  let formData = localStorage.getItem(STORAGE_KEY);
 
-function populateTextInput() {
-  const savedMessage = localStorage.getItem(STORAGE_KEY);
-  if (savedMessage) {
-    console.log(savedMessage);
-    refs.email.value = JSON.parse(savedMessage).email;
-  }
-}
-
-function populateTextForm() {
-  const savedMessage = localStorage.getItem(STORAGE_KEY);
-
-  if (savedMessage) {
-    console.log(savedMessage);
-    refs.textarea.value = JSON.parse(savedMessage).message;
+  if (formData) {
+    formData = JSON.parse(formData);
+    Object.entries(formData).forEach(
+      ([name, value]) => (feedbackFormRef.elements[name].value = value)
+    );
   }
 }
