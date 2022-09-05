@@ -35,8 +35,6 @@ function onFormSubmit(e) {
 function onTextareaInput(e) {
   const message = e.target.value;
   console.log(message);
-
-  localStorage.setItem(STORAGE_KEY, message);
 }
 
 function populateTextInput() {
